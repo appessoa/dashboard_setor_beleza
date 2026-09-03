@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Ambientes virtuais ---
+.venv/
+venv/
+env/
+
+# --- Variáveis de ambiente ---
+.env
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+
+# --- Dados brutos da B3 (arquivos gigantes, NÃO versionar) ---
+data/raw/
+COTAHIST_A*.TXT
+COTAHIST_A*.txt
+
+# IMPORTANTE: o dataset processado É versionado (necessário no Streamlit Cloud)
+!data/beleza.parquet
