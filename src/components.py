@@ -4,6 +4,7 @@ Componentes visuais reutilizáveis do infográfico (Streamlit + HTML/CSS).
 
 from __future__ import annotations
 
+import base64
 import html
 from pathlib import Path
 
@@ -51,14 +52,27 @@ def render_illustration(nome: str, legenda: str = "", largura: int | None = None
 # --------------------------------------------------------------------------- #
 def render_logo() -> None:
     """
-    Logo da Natura como imagem (assets/natura-108.png), com fallback textual
-    elegante apenas se o arquivo sumir. Substitui o antigo texto "NATURA".
+    Logo da Natura como imagem (assets/natura-108.png), centralizada.
+
+    CORREÇÃO (item 1): a logo era renderizada à esquerda e quebrava o layout.
+    Agora usamos 3 colunas [1, 2, 1] e, na coluna central, injetamos a imagem
+    como <img> dentro de um flex container — assim ela fica perfeitamente
+    centralizada (o st.image sozinho continuaria "colado" à esquerda da coluna).
     """
-    if config.LOGO_PATH.exists():
-        # width=150 fica harmônico com o título editorial ao lado.
-        st.image(str(config.LOGO_PATH), width=150)
-    else:
-        st.markdown("<div class='ig-logo'>Natura</div>", unsafe_allow_html=True)
+    _, col_centro, _ = st.columns([1, 2, 1])
+    with col_centro:
+        if config.LOGO_PATH.exists():
+            dados = base64.b64encode(config.LOGO_PATH.read_bytes()).decode()
+            st.markdown(
+                f"<div style='display:flex;justify-content:center;margin:0.2rem 0 0.6rem 0'>"
+                f"<img src='data:image/png;base64,{dados}' width='150' alt='Natura'></div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<div class='ig-logo' style='text-align:center'>Natura</div>",
+                unsafe_allow_html=True,
+            )
 
 
 def render_header(subtitulo: str) -> None:
@@ -86,6 +100,9 @@ def section(numero: str, titulo: str, lead: str = "") -> None:
     )
     if lead:
         st.markdown(f"<p class='ig-lead'>{html.escape(lead)}</p>", unsafe_allow_html=True)
+    # CORREÇÃO (item 3): respiro entre o cabeçalho da seção e o gráfico logo abaixo,
+    # evitando que o título do Plotly encoste no texto da seção.
+    st.markdown("<div class='ig-space-sm'></div>", unsafe_allow_html=True)
 
 
 def reading(texto: str, rotulo: str = "Leitura do gráfico", variante: str = "") -> None:

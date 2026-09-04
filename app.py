@@ -8,6 +8,8 @@ Executar:  streamlit run app.py
 
 from __future__ import annotations
 
+import html  # NOVO: escape de texto na barra "Mercado agora" (HTML custom)
+
 import pandas as pd
 import streamlit as st
 
@@ -49,10 +51,12 @@ st.set_page_config(
 # Índices/ações exibidos no topo. `ticker` é o símbolo no Yahoo Finance;
 # `mock` é o valor de reserva usado quando o yfinance falha ou não tem o índice
 # (caso do ISEE e do ICON, que não têm símbolo público estável no Yahoo).
-# NTCO3 e IBOV usam dados reais do yfinance; o `mock` deles só aparece se a
+# NATU3 e IBOV usam dados reais do yfinance; o `mock` deles só aparece se a
 # API estiver fora do ar (assim o layout nunca fica vazio numa demo).
+# Obs.: no Yahoo Finance o papel da Natura hoje é NATU3.SA (a antiga NTCO3.SA
+# ficou sem dados após a troca de ticker de 01/07/2025).
 INDICADORES_MERCADO = [
-    {"rotulo": "NTCO3 · Natura", "ticker": "NTCO3.SA",
+    {"rotulo": "NATU3 · Natura", "ticker": "NATU3.SA",
      "mock": {"valor": 12.34, "variacao_pct": 0.0}},
     {"rotulo": "IBOV · Ibovespa", "ticker": "^BVSP",
      "mock": {"valor": 132500.00, "variacao_pct": 0.0}},
@@ -89,21 +93,39 @@ def _formatar_reais(valor: float) -> str:
 
 
 def render_painel_cotacoes() -> None:
-    """Renderiza a faixa de cotações com st.columns + st.metric (setas/cores nativas)."""
-    colunas = st.columns(len(INDICADORES_MERCADO))
-    for coluna, indicador in zip(colunas, INDICADORES_MERCADO):
+    """
+    CORREÇÃO (item 2): faixa "Mercado agora" como uma barra horizontal única,
+    no estilo do site de RI da Natura.
+
+    Trocamos o st.metric (que gera cartões separados) por HTML/CSS injetado:
+    fundo azul-escuro (#062b33), tickers lado a lado, texto branco e a
+    variação % em verde (alta) / vermelho (baixa), com fonte um pouco menor.
+    As classes CSS (.ticker-bar / .ticker-*) estão em src/styles.py.
+    """
+    blocos = []
+    for indicador in INDICADORES_MERCADO:
         # dados reais do yfinance; se vier None, usa o mock (ou traço, se não houver)
         dados = _buscar_cotacao(indicador["ticker"]) or indicador["mock"]
-        with coluna:
-            if not dados:
-                st.metric(indicador["rotulo"], "—")
-            else:
-                st.metric(
-                    label=indicador["rotulo"],
-                    value=_formatar_reais(dados["valor"]),
-                    # delta com sinal → st.metric pinta verde (alta) / vermelho (baixa)
-                    delta=f"{dados['variacao_pct']:+.2f}%",
-                )
+        codigo = html.escape(indicador["rotulo"].split(" · ")[0])  # só "NTCO3", "IBOV"...
+
+        if not dados:
+            valor_txt, var_html = "—", ""
+        else:
+            valor_txt = _formatar_reais(dados["valor"])
+            pct = dados["variacao_pct"]
+            cor = "#2ecc71" if pct >= 0 else "#e74c3c"   # verde/vermelho de mercado
+            seta = "▲" if pct >= 0 else "▼"     # ▲ / ▼
+            var_html = f"<span class='ticker-var' style='color:{cor}'>{seta} {pct:+.2f}%</span>"
+
+        blocos.append(
+            "<div class='ticker-item'>"
+            f"<span class='ticker-nome'>{codigo}</span>"
+            f"<span class='ticker-valor'>{html.escape(valor_txt)}</span>"
+            f"{var_html}"
+            "</div>"
+        )
+
+    st.markdown("<div class='ticker-bar'>" + "".join(blocos) + "</div>", unsafe_allow_html=True)
 
 
 # --------------------------------------------------------------------------- #

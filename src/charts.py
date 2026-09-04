@@ -40,15 +40,21 @@ def cor_empresa(empresa: str, empresas_selecionadas: list[str], contexto: str = 
 
 
 def _aplicar_tema(fig: go.Figure, tema: dict, altura: int = 420) -> go.Figure:
+    # CORREÇÃO (item 3): o título estava colando na legenda e no topo da figura.
+    # Aumentamos a margem superior (t=60→70) e afastamos a legenda horizontal
+    # para baixo do título (y=1.10), eliminando a sobreposição.
     fig.update_layout(
         template=tema["plotly_template"],
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(color=tema["texto"], size=13),
-        margin=dict(l=10, r=10, t=48, b=10),
-        height=altura,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        title=dict(font=dict(size=15, color=tema["texto"])),
+        margin=dict(l=10, r=10, t=70, b=10),
+        height=altura + 12,  # compensa a margem extra, preservando a área do plot
+        legend=dict(orientation="h", yanchor="bottom", y=1.10, xanchor="left", x=0),
+        title=dict(
+            font=dict(size=15, color=tema["texto"]),
+            x=0, xanchor="left", y=0.98, yanchor="top",
+        ),
         hoverlabel=dict(font_size=12),
     )
     fig.update_xaxes(gridcolor=tema["grid"], zeroline=False)

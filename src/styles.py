@@ -177,21 +177,37 @@ section[data-testid="stSidebar"] * {{ color: var(--texto); }}
 }}
 div[data-testid="stImage"] img {{ border-radius: 6px; }}
 
-/* ---------- Painel de cotações ao vivo (ticker / st.metric) ---------- */
-div[data-testid="stMetric"] {{
-    background: var(--bg-bloco);
-    border: 1px solid var(--borda);
+/* ---------- Barra "Mercado agora" (item 2 — estilo site de RI) ---------- */
+.ticker-bar {{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2.4rem;
+    background: #062b33;              /* azul-escuro, como no site de RI */
     border-radius: 8px;
-    padding: 0.7rem 0.9rem;
-    /* evita que valores longos vazem para fora do cartão */
-    overflow: hidden;
+    padding: 0.75rem 1.4rem;
+    margin: 0.2rem 0 0.4rem 0;
+    overflow-x: auto;                 /* rola em telas estreitas, não quebra */
 }}
-div[data-testid="stMetric"] * {{ overflow-wrap: anywhere; }}
-div[data-testid="stMetricLabel"] p {{
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--texto-sec);
+.ticker-bar .ticker-item {{
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    white-space: nowrap;
+}}
+.ticker-bar .ticker-nome {{
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    letter-spacing: 0.03em;
+}}
+.ticker-bar .ticker-valor {{
+    color: #dfe8ea;
+    font-size: 0.92rem;
+}}
+.ticker-bar .ticker-var {{
+    font-size: 0.78rem;              /* variação % um pouco menor */
+    font-weight: 700;
 }}
 
 /* ---------- Correção de sobreposição / quebra de layout ---------- */
@@ -200,12 +216,39 @@ div[data-testid="stVerticalBlock"] > div {{ margin-bottom: 0.35rem; }}
 /* Espaçamento lateral entre colunas para textos/gráficos não se tocarem */
 div[data-testid="stHorizontalBlock"] {{ gap: 1.4rem; }}
 div[data-testid="column"] {{ padding: 0 0.35rem; }}
-/* Gráficos Plotly ocupam 100% da coluna e não estouram a largura */
+/* Gráficos Plotly ocupam 100% da coluna, não estouram a largura e ganham
+   um respiro maior no topo (item 3) para o título não colar na seção acima */
 div[data-testid="stPlotlyChart"], .js-plotly-plot, .plot-container {{
     width: 100% !important;
     max-width: 100%;
-    margin: 0.4rem 0 0.8rem 0;
+    margin: 1rem 0 1rem 0;
 }}
+
+/* ---------- st.date_input legível no modo escuro (item 4) ---------- */
+/* No modo escuro o campo de data ficava com fundo branco fixo e os dígitos
+   da data (dd/mm/aaaa) na cor do tema (quase branca) => texto invisível.
+   Forçamos fundo escuro do tema + texto de alto contraste em ambos os temas.
+   Cobrimos as duas implementações do Streamlit: BaseWeb (<input>) e a nova
+   baseada em react-aria (.react-aria-DateField, com segmentos em <span>). */
+.stDateInput > div > div,
+.stDateInput div[data-baseweb="input"] {{
+    background: var(--bg-bloco-alt) !important;
+    border: 1px solid var(--borda) !important;
+}}
+.stDateInput input,
+.stDateInput .react-aria-DateField,
+.stDateInput .react-aria-DateField span,
+div[data-baseweb="input"] input {{
+    color: var(--texto) !important;
+    -webkit-text-fill-color: var(--texto) !important;
+    background: transparent !important;
+    opacity: 1 !important;
+}}
+/* Calendário popover (BaseWeb ou react-aria): fundo e números legíveis */
+div[data-baseweb="calendar"],
+.stDateInput [class*="Calendar"] {{ background: var(--bg-bloco-alt) !important; }}
+div[data-baseweb="calendar"] *,
+.stDateInput [class*="Calendar"] * {{ color: var(--texto) !important; }}
 /* Qualquer texto longo quebra em vez de vazar da tela */
 .stApp p, .stApp li, .stApp span, .ig-lead, .ig-reading p, .ig-insight span,
 .ig-subtitle, .ig-title, .ig-section-title {{
