@@ -50,9 +50,13 @@ def render_illustration(nome: str, legenda: str = "", largura: int | None = None
 # Header
 # --------------------------------------------------------------------------- #
 def render_logo() -> None:
-    """Logo da Natura, com fallback textual elegante quando o PNG não existe."""
+    """
+    Logo da Natura como imagem (assets/natura-108.png), com fallback textual
+    elegante apenas se o arquivo sumir. Substitui o antigo texto "NATURA".
+    """
     if config.LOGO_PATH.exists():
-        st.image(str(config.LOGO_PATH), width=170)
+        # width=150 fica harmônico com o título editorial ao lado.
+        st.image(str(config.LOGO_PATH), width=150)
     else:
         st.markdown("<div class='ig-logo'>Natura</div>", unsafe_allow_html=True)
 

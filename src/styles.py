@@ -177,6 +177,44 @@ section[data-testid="stSidebar"] * {{ color: var(--texto); }}
 }}
 div[data-testid="stImage"] img {{ border-radius: 6px; }}
 
+/* ---------- Painel de cotações ao vivo (ticker / st.metric) ---------- */
+div[data-testid="stMetric"] {{
+    background: var(--bg-bloco);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    /* evita que valores longos vazem para fora do cartão */
+    overflow: hidden;
+}}
+div[data-testid="stMetric"] * {{ overflow-wrap: anywhere; }}
+div[data-testid="stMetricLabel"] p {{
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texto-sec);
+}}
+
+/* ---------- Correção de sobreposição / quebra de layout ---------- */
+/* Respiro vertical entre blocos empilhados do Streamlit */
+div[data-testid="stVerticalBlock"] > div {{ margin-bottom: 0.35rem; }}
+/* Espaçamento lateral entre colunas para textos/gráficos não se tocarem */
+div[data-testid="stHorizontalBlock"] {{ gap: 1.4rem; }}
+div[data-testid="column"] {{ padding: 0 0.35rem; }}
+/* Gráficos Plotly ocupam 100% da coluna e não estouram a largura */
+div[data-testid="stPlotlyChart"], .js-plotly-plot, .plot-container {{
+    width: 100% !important;
+    max-width: 100%;
+    margin: 0.4rem 0 0.8rem 0;
+}}
+/* Qualquer texto longo quebra em vez de vazar da tela */
+.stApp p, .stApp li, .stApp span, .ig-lead, .ig-reading p, .ig-insight span,
+.ig-subtitle, .ig-title, .ig-section-title {{
+    overflow-wrap: break-word;
+    word-break: break-word;
+}}
+/* KPIs editoriais: permite rolagem horizontal em telas estreitas */
+.ig-kpis {{ overflow-x: auto; }}
+
 /* ---------- Footer ---------- */
 .ig-footer {{
     margin-top: 3rem;

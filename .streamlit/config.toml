@@ -1,9 +1,10 @@
 [theme]
+# Paleta clara inspirada no site de RI da Natura.
 base = "light"
-primaryColor = "#006B3C"
-backgroundColor = "#FAF9F6"
-secondaryBackgroundColor = "#F4EFE7"
-textColor = "#263238"
+primaryColor = "#006B3C"              # verde institucional Natura
+backgroundColor = "#FFFFFF"           # fundo principal branco
+secondaryBackgroundColor = "#F4F4F4"  # sidebar / widgets em cinza-claro
+textColor = "#333333"                 # texto grafite de alto contraste
 font = "serif"
 
 [server]

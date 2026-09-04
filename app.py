@@ -11,6 +11,16 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+# NOVO (item 3): yfinance é usado no painel de cotações ao vivo.
+# É opcional — se não estiver instalado, o painel cai para valores mockados.
+# Instale com:  pip install yfinance
+try:
+    import yfinance as yf
+
+    _YFINANCE_OK = True
+except Exception:  # pragma: no cover
+    _YFINANCE_OK = False
+
 from src import analysis, charts, config
 from src.components import (
     espaco,
@@ -31,6 +41,69 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+
+# --------------------------------------------------------------------------- #
+# NOVO (item 3) — Painel de cotações ao vivo (ticker)
+# --------------------------------------------------------------------------- #
+# Índices/ações exibidos no topo. `ticker` é o símbolo no Yahoo Finance;
+# `mock` é o valor de reserva usado quando o yfinance falha ou não tem o índice
+# (caso do ISEE e do ICON, que não têm símbolo público estável no Yahoo).
+# NTCO3 e IBOV usam dados reais do yfinance; o `mock` deles só aparece se a
+# API estiver fora do ar (assim o layout nunca fica vazio numa demo).
+INDICADORES_MERCADO = [
+    {"rotulo": "NTCO3 · Natura", "ticker": "NTCO3.SA",
+     "mock": {"valor": 12.34, "variacao_pct": 0.0}},
+    {"rotulo": "IBOV · Ibovespa", "ticker": "^BVSP",
+     "mock": {"valor": 132500.00, "variacao_pct": 0.0}},
+    {"rotulo": "ISEE · Sustentabilidade", "ticker": "^ISEE",
+     "mock": {"valor": 4383.04, "variacao_pct": 0.41}},
+    {"rotulo": "ICON · Consumo", "ticker": "^ICON",
+     "mock": {"valor": 2954.96, "variacao_pct": -0.23}},
+]
+
+
+@st.cache_data(ttl=300, show_spinner=False)  # cache de 5 min p/ não bater na API a cada rerun
+def _buscar_cotacao(ticker: str) -> dict | None:
+    """
+    Busca o último fechamento e a variação % vs. o pregão anterior via yfinance.
+    Retorna None se a lib não estiver instalada ou o ticker não retornar dados.
+    """
+    if not _YFINANCE_OK:
+        return None
+    try:
+        hist = yf.Ticker(ticker).history(period="5d", interval="1d")
+        if hist is None or hist.empty or len(hist) < 2:
+            return None
+        atual = float(hist["Close"].iloc[-1])
+        anterior = float(hist["Close"].iloc[-2])
+        variacao = (atual - anterior) / anterior * 100 if anterior else 0.0
+        return {"valor": atual, "variacao_pct": variacao}
+    except Exception:
+        return None
+
+
+def _formatar_reais(valor: float) -> str:
+    """Formata no padrão brasileiro: 1.234,56."""
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def render_painel_cotacoes() -> None:
+    """Renderiza a faixa de cotações com st.columns + st.metric (setas/cores nativas)."""
+    colunas = st.columns(len(INDICADORES_MERCADO))
+    for coluna, indicador in zip(colunas, INDICADORES_MERCADO):
+        # dados reais do yfinance; se vier None, usa o mock (ou traço, se não houver)
+        dados = _buscar_cotacao(indicador["ticker"]) or indicador["mock"]
+        with coluna:
+            if not dados:
+                st.metric(indicador["rotulo"], "—")
+            else:
+                st.metric(
+                    label=indicador["rotulo"],
+                    value=_formatar_reais(dados["valor"]),
+                    # delta com sinal → st.metric pinta verde (alta) / vermelho (baixa)
+                    delta=f"{dados['variacao_pct']:+.2f}%",
+                )
 
 
 # --------------------------------------------------------------------------- #
@@ -126,6 +199,16 @@ subtitulo_recorte = (
     f"{kpis['empresas_analisadas']} empresa(s) · {kpis['pregoes']} pregões"
 )
 st.caption(subtitulo_recorte)
+
+# NOVO (item 3): faixa de cotações ao vivo, logo abaixo do cabeçalho/logo.
+espaco("sm")
+st.markdown("<div class='ig-section-num'>MERCADO AGORA</div>", unsafe_allow_html=True)
+render_painel_cotacoes()
+if not _YFINANCE_OK:
+    st.caption("⚠️ `yfinance` não instalado — cotações exibidas são exemplos. Rode `pip install yfinance`.")
+else:
+    st.caption("Fonte: Yahoo Finance (atualiza a cada 5 min). ISEE e ICON são ilustrativos.")
+espaco("md")
 
 
 # --------------------------------------------------------------------------- #

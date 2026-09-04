@@ -41,7 +41,9 @@ RAW_DATA_PATH = Path(os.getenv("RAW_DATA_PATH", BASE_DIR / "data" / "raw"))
 if not RAW_DATA_PATH.is_absolute():
     RAW_DATA_PATH = BASE_DIR / RAW_DATA_PATH
 
-LOGO_PATH = ASSETS_PATH / "logo_natura.png"
+# Logo oficial da Natura (arquivo entregue em assets/). Antes apontava para
+# "logo_natura.png" (inexistente), o que forçava o fallback textual "NATURA".
+LOGO_PATH = ASSETS_PATH / "natura-108.png"
 ILLUSTRATIONS = {
     "imagem_01": ASSETS_PATH / "imagem_01.png",
     "imagem_02": ASSETS_PATH / "imagem_02.png",
@@ -133,19 +135,21 @@ NOMES_EMPRESAS = {
 # --------------------------------------------------------------------------- #
 # Temas (infográfico editorial) — cores definidas no briefing do projeto
 # --------------------------------------------------------------------------- #
+# Paleta clara inspirada no site de RI da Natura (natura-ir.com):
+# fundo branco, cartões/sidebar cinza-claro, texto grafite de alto contraste.
 TEMA_CLARO = {
     "nome": "claro",
-    "bg": "#FAF9F6",
-    "bg_bloco": "#F4EFE7",
-    "bg_bloco_alt": "#FFFFFF",
-    "texto": "#263238",
-    "texto_secundario": "#5B6B70",
-    "verde": "#006B3C",
+    "bg": "#FFFFFF",            # fundo principal — branco limpo
+    "bg_bloco": "#F4F4F4",      # sidebar / blocos de leitura — cinza suave
+    "bg_bloco_alt": "#FAFAFA",  # cartões alternativos — quase branco
+    "texto": "#333333",         # texto principal — grafite escuro
+    "texto_secundario": "#6E6E6E",  # texto de apoio — cinza médio
+    "verde": "#006B3C",         # verde institucional Natura (destaque/links)
     "laranja": "#F28C28",
     "terracota": "#D96C4F",
-    "bege": "#F4EFE7",
-    "borda": "#E2DED3",
-    "grid": "rgba(38,50,56,0.12)",
+    "bege": "#F4F4F4",          # realce de linha da tabela (era bege quente)
+    "borda": "#E4E4E4",         # divisórias discretas
+    "grid": "rgba(51,51,51,0.10)",  # grade dos gráficos alinhada ao novo texto
     "plotly_template": "plotly_white",
 }
 
