@@ -29,6 +29,10 @@ def css(tema: dict) -> str:
 }}
 
 .stApp {{ background: var(--bg); }}
+/* CORREÇÃO (modo escuro): o header nativo do Streamlit (menu/Deploy) tem
+   fundo branco fixo e não acompanha o tema — força transparência para
+   herdar o fundo de .stApp por trás dele. */
+header[data-testid="stHeader"] {{ background-color: transparent !important; }}
 section[data-testid="stSidebar"] {{ background: var(--bg-bloco); border-right: 1px solid var(--borda); }}
 section[data-testid="stSidebar"] * {{ color: var(--texto); }}
 .block-container {{

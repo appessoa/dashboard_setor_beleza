@@ -51,7 +51,12 @@ def _aplicar_tema(fig: go.Figure, tema: dict, altura: int = 420) -> go.Figure:
         height=altura + 12,  
         
         # 2. Legenda abaixada de y=1.10 para y=1.02 para não encostar no título
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        # CORREÇÃO (modo escuro): font da legenda explícita — sem isso ela
+        # herdava uma cor fixa do template Plotly e sumia sobre fundo escuro.
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
+            font=dict(color=tema["texto"]),
+        ),
         
         title=dict(
             font=dict(size=15, color=tema["texto"]),

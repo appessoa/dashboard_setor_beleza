@@ -339,8 +339,12 @@ section(
 ranking = analysis.ranking_multidimensional(df, retornos, pivot, empresas_sel)
 if not ranking.empty:
     def _destacar_foco(linha):
+        # CORREÇÃO (modo escuro): 'bege' no tema escuro é um verde bem escuro
+        # (#2A332F) — sem forçar `color` aqui, o texto ficava na cor padrão
+        # do grid (preta) e ficava ilegível sobre esse fundo. `tema['texto']`
+        # garante contraste em ambos os temas.
         if linha.name == config.EMPRESA_FOCO:
-            return [f"background-color: {tema['bege']}; font-weight: 700"] * len(linha)
+            return [f"background-color: {tema['bege']}; color: {tema['texto']}; font-weight: 700"] * len(linha)
         return [""] * len(linha)
 
     estilo = (
