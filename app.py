@@ -350,23 +350,26 @@ if not ranking.empty:
     )
     st.dataframe(estilo, use_container_width=True)
 
-col_a, col_b = st.columns(2)
-with col_a:
+# Layout 2 colunas (65% gráfico / 35% textos): no mobile o Streamlit já
+# empilha `st.columns` automaticamente (gráfico primeiro, textos depois),
+# então a mesma estrutura serve para desktop e mobile.
+col_grafico, col_textos = st.columns([65, 35], vertical_alignment="center")
+with col_grafico:
     share = analysis.share_liquidez(df, empresas_sel)
+    # título + legenda já fazem parte da própria figura Plotly (ver
+    # charts.pizza_share / _aplicar_tema); use_container_width faz o gráfico
+    # ocupar 100% da largura desta coluna.
     st.plotly_chart(
         charts.pizza_share(share["volume"], empresas_sel, tema, "Share de liquidez no período"),
         use_container_width=True,
     )
+
+ab = analysis.teste_ab(retornos)
+with col_textos:
+    # As duas "caixas de texto" empilhadas — vertical_alignment="center" no
+    # st.columns acima já centraliza este bloco em relação à altura do gráfico.
     reading(share["leitura"])
-with col_b:
-    ab = analysis.teste_ab(retornos)
     if ab:
-        st.plotly_chart(
-            charts.boxplot_precos(df[df["CODNEG"].isin([ab["grupo_a"], ab["grupo_b"]])],
-                                  [ab["grupo_a"], ab["grupo_b"]], tema,
-                                  f"{ab['grupo_a']} vs. {ab['grupo_b']} — fechamento"),
-            use_container_width=True,
-        )
         reading(
             f"Teste t de Welch dos retornos diários: p-valor = {ab['p_value']:.4f} "
             f"({ab['conclusao_curta']}). Média diária {ab['grupo_a']}: "
@@ -376,6 +379,16 @@ with col_b:
         )
     else:
         st.info("Selecione NTCO3 e RADL3 para ver o teste A/B do notebook.")
+
+if ab:
+    # Gráfico de apoio do teste A/B (NTCO3 vs. RADL3): full-width abaixo do
+    # grid principal, já que não é nem o "gráfico de rosca" nem um "texto".
+    st.plotly_chart(
+        charts.boxplot_precos(df[df["CODNEG"].isin([ab["grupo_a"], ab["grupo_b"]])],
+                              [ab["grupo_a"], ab["grupo_b"]], tema,
+                              f"{ab['grupo_a']} vs. {ab['grupo_b']} — fechamento"),
+        use_container_width=True,
+    )
 
 
 # --------------------------------------------------------------------------- #
